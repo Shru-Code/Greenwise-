@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -47,8 +46,41 @@ const ContactForm = () => {
     e.preventDefault();
     setLoading(true);
     
+    // Validate form data
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      // Log the data being sent
+      console.log('Attempting to submit form data:', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        is_volunteer: formData.isVolunteer,
+        skills: formData.skills || null,
+        message: formData.message,
+      });
+
+      // First, check if the table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('contact_submissions')
+        .select('id')
+        .limit(1);
+
+      if (tableError) {
+        console.error('Table check error:', tableError);
+        throw new Error(`Database error: ${tableError.message}`);
+      }
+
+      // If table exists, proceed with insert
+      const { data, error } = await supabase
         .from('contact_submissions')
         .insert({
           name: formData.name,
@@ -57,11 +89,15 @@ const ContactForm = () => {
           is_volunteer: formData.isVolunteer,
           skills: formData.skills || null,
           message: formData.message,
-        });
+        })
+        .select();
 
       if (error) {
-        throw error;
+        console.error('Supabase insert error:', error);
+        throw new Error(`Failed to submit: ${error.message}`);
       }
+
+      console.log('Submission successful:', data);
 
       toast({
         title: "Message sent!",
@@ -83,7 +119,7 @@ const ContactForm = () => {
       console.error('Error submitting contact form:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {

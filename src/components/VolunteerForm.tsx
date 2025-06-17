@@ -50,11 +50,12 @@ const VolunteerForm: React.FC<VolunteerFormProps> = ({ onSuccess }) => {
     setSuccessMessage(null);
 
     try {
-      const { error } = await supabase.from('volunteers').insert({
-        full_name: fullName,
+      const { error } = await supabase.from('contact_submissions').insert({
+        name: fullName,
         email: email,
-        phone_number: phoneNumber,
-        skills: selectedSkills,
+        phone: phoneNumber,
+        is_volunteer: true,
+        skills: selectedSkills.join(', '),
         message: message,
       });
 
