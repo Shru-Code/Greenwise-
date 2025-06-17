@@ -4,7 +4,12 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
+  base: "/Greenwise-/",
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true
+  },
   server: {
     port: 3000,
     open: true,
